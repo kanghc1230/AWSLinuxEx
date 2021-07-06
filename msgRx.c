@@ -13,7 +13,8 @@ int main(void)
         // STEP 1-2. 메세지큐 생성
         msgid = msgget((key_t)1234, 0666 | IPC_CREAT);
         // 메세지큐가 생성되지 못한경우 
-        if(msgid == -1) {
+        if(msgid == -1) 
+	{
                 fprintf(stderr,"msgget failed with error : %d\n", errno);
                 exit(EXIT_FAILURE);
         }
@@ -44,4 +45,5 @@ int main(void)
 	}	
 	exit(EXIT_SUCCESS);
 }
+
 
