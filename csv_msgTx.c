@@ -32,11 +32,11 @@ int main(void)
         	st.math = atoi(ptr);
         	ptr = strtok(NULL,",");
         	st.scien = atoi(ptr);
-		//파일플래그기본1 본인이 마지막이면0
 
+		//파일플래그기본0 본인이 마지막이면1
 		//다음타자 한문장씩 buffer에 미리 읽어들인다
                 fpState = fgets(buffer, sizeof(buffer), fp);
-                //본인이 마지막이면 0
+                //본인이 마지막이면 1
 		if (fpState ==NULL) 
                         st.file_flag = 1;
 
