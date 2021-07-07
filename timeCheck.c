@@ -21,6 +21,7 @@ int main(void)
 	// 종료 시간 기록
 	end_point = clock();
 
+											//시작시간 - 종료시간
 	printf("Exe time : %f sec\n", ((double)(end_point - start_point)/CLOCKS_PER_SEC));
 	printf("Result Value : %ld\n", sum);
 }
