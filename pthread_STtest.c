@@ -7,6 +7,7 @@
 struct Data{
     int start;
     int end;
+    long long result;
 };
 long long adder (int start, int end)
 {
@@ -17,11 +18,10 @@ long long adder (int start, int end)
 }
 void* t_function(void* data)
 {
-    long long result = 0;
     struct Data *value = (struct Data*)data;
     printf ("in t_func : (*value).start = %d , (*value).end = %d\n", (*value).start, (*value).end);
-    result = adder ((*value).start ,(*value).end);
-    return (void*)result;
+    (*value).result = adder ((*value).start ,(*value).end);
+    return (void*)0;
 }
 int main(void)
 {
@@ -53,12 +53,10 @@ int main(void)
     }
 
     pthread_join(pthread[0], (void**)&status); 
-    printf("thread_join(0) : %lld\n",status);
-    result += status;
 
     pthread_join(pthread[1], (void**)&status);
-    printf("thread_join(1) : %lld\n",status);
-    result += status;
+
+    result = t1.result + t2.result;
 
     printf("result : %lld\n",result);
     
