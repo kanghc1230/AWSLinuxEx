@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 		printf("Usage : %s <IP> <port>\n", argv[0]);
 		exit(1);
 	}
-
+	// 소켓생성
 	sock=socket(PF_INET, SOCK_STREAM, 0);   
 	if(sock==-1)
 		error_handling("socket() error");

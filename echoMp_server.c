@@ -13,18 +13,23 @@
 
 #define BUF_SIZE 1024//파일 읽어올 크기
 
+// 에러핸들러
 void error_handling(char *message)
 {
     fputs(message, stderr);
 	fputc('\n', stderr);
 	exit(1);
 }
+
+// signal (SIGCHLD, read_childproc);
+// 자식 프로세스가 종료됬는지 체크
 void read_childproc(int sig){
 	pid_t pid;
 	int status;
-	pid=waitpid(-1, &status, WNOHANG); //wait(&status); 에 WNOHANG: 종료안해도리턴
+	pid=waitpid(-1, &status, WNOHANG); //wait(&status); //+WNOHANG:종료안해도리턴 
 	printf("removed proc id: %d \n", pid);
 }
+
 int main(int argc, char *argv[])
 {
     int serv_sock, clnt_sock;
@@ -42,18 +47,21 @@ int main(int argc, char *argv[])
     // SIGCHLD를 받으면 read_childproc()함수로 이동
     signal (SIGCHLD, read_childproc);
 
-    // STEP 1. socket()
+    // STEP 1. socket() 생성 _iob[3]즉 sock에 번호값 3
+    // _iob[0]:stdin _iob[1]:stdout _iob[3]:stderr
     serv_sock=socket(PF_INET, SOCK_STREAM, 0);
+    printf("serv_sock : %d\n",serv_sock); // 3
 
-    // STEP 2. bind()
+    // STEP 2.1 bind()전 adr에 값넣기
     memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family=AF_INET;
 	serv_adr.sin_addr.s_addr=htonl(INADDR_ANY);
 	serv_adr.sin_port=htons(atoi(argv[1]));
+    // STEP 2.2 bind() 소캣과 주소 묶기
     if(bind(serv_sock, (struct sockaddr*) &serv_adr, sizeof(serv_adr))==-1)
 		error_handling("bind() error");
 
-    // STEP 3. listen()
+    // STEP 3. listen() 대기열공간할당
 	if(listen(serv_sock, 5)==-1)
 		error_handling("listen() error");
 
@@ -62,8 +70,10 @@ int main(int argc, char *argv[])
     {
         // STEP 4.2 accept()
         adr_sz=sizeof(clnt_adr);
+        // clnt sock에 4
 		clnt_sock=accept(serv_sock, (struct sockaddr*)&clnt_adr, &adr_sz);
-		if(clnt_sock==-1) //재접속시도
+		printf("clnt_sock : %d\n", clnt_sock); // 4
+        if(clnt_sock==-1) //재접속시도
 			continue;
 		else
 			puts("new client connected...");
@@ -82,8 +92,8 @@ int main(int argc, char *argv[])
 			close(serv_sock); // (&) 자식에선 서버소켓닫기
 
             // STEP 5. read(), write() 
-			while((str_len=read(clnt_sock, buf, BUF_SIZE))!=0)
-				write(clnt_sock, buf, str_len);
+			while((str_len=read(clnt_sock, buf, BUF_SIZE))!=0) // !=0 NULL 파일의끝이나 클라이언트가close(sock)이오면
+                write(clnt_sock, buf, str_len);
             // STEP 6. client close()
 			close(clnt_sock);
 			puts("client disconnected...");
@@ -92,6 +102,8 @@ int main(int argc, char *argv[])
         // 부모프로세스
         else //pid>0
             close(clnt_sock); // (&) 부모에선 클라소켓닫기
+            // 멀티프로세스에선 프로세스를 종료clnt_sock이 4번을 계속출력, 멀티쓰레드면 4,5,6,7 소켓추가시킴
+
     } //부모는 다시 while(1)따라 accept처리하러감
 
     // STEP 6. shutdown(), close()
